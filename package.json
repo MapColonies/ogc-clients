@@ -1,0 +1,22 @@
+{
+  "name": "root",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build:wfs-client": "lerna run --scope @map-colonies/wfs-client build --stream",
+    "test:wfs-client": "lerna run --scope @map-colonies/wfs-client test --stream",
+    "build": "lerna run build --stream",
+    "release": "cross-env HUSKY=0 lerna publish",
+    "test": "NODE_ENV=test jest --coverage",
+    "lint": "eslint . --ext .ts,.tsx",
+    "prepare": "husky install",
+    "prettier:check": "prettier --check packages/**/*.{js,jsx,ts,tsx}",
+    "prettier:fix": "prettier --write packages/**/*.{js,jsx,ts,tsx}",
+    "postinstall": "patch-package"
+  },
+  "devDependencies": {
+    "lerna": "^8.2.1"
+  }
+}
