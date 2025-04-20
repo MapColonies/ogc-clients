@@ -1,12 +1,14 @@
-import { Extent, Filter, Geometry } from '../../src/filters';
+import { Extent, Filter, Geom } from '../../src/filters';
 import { WfsClient } from '../../src/wfs-client';
 
-let wfsClient110 = new WfsClient('1.1.0', 'https://mockUrl');
-let wfsClient200 = new WfsClient('2.0.0', 'https://mockUrl');
+const BASE_URL = 'https://mockUrl';
+
+const wfsClient110 = new WfsClient('1.1.0', BASE_URL);
+const wfsClient200 = new WfsClient('2.0.0', BASE_URL);
 
 describe('GetCapabilities', function () {
   const getCapabilitiesResponseXml200 = `<?xml version="1.0" encoding="UTF-8"?>
-  <wfs:WFS_Capabilities version="2.0.0"
+    <wfs:WFS_Capabilities version="2.0.0"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xmlns="http://www.opengis.net/wfs/2.0"
       xmlns:wfs="http://www.opengis.net/wfs/2.0"
@@ -52,7 +54,7 @@ describe('GetCapabilities', function () {
               </ows:WGS84BoundingBox>
           </FeatureType>
       </FeatureTypeList>
-  </wfs:WFS_Capabilities>`;
+    </wfs:WFS_Capabilities>`;
 
   const expectedJson = {
     featureType: [
@@ -111,28 +113,56 @@ describe('GetCapabilities', function () {
 });
 
 describe('GetFeature', () => {
-  const ext: Extent = [12, 112, 14, 114];
+  const extent: Extent = [-180, -90, 180, 90];
+  const geometry = new Geom.Polygon([
+    [
+      [
+        6.609085800757157,
+        20.548381396523084
+      ],
+      [
+        15.240318467486333,
+        5.11590215012076
+      ],
+      [
+        29.99934901925451,
+        15.087905911998007
+      ],
+      [
+        24.121708960844103,
+        21.80665402351343
+      ],
+      [
+        6.609085800757157,
+        20.548381396523084
+      ]
+    ]
+  ]);
 
-  const getCapabilitiesRequest = wfsClient200.GetFeatureRequest({
-    featureNS: 'NsFeatu',
-    featurePrefix: 'prefiFe',
-    featureTypes: ['buildings'],
+  const getFeatureReq = `<GetFeature xmlns="http://www.opengis.net/wfs/2.0" service="WFS" version="2.0.0" outputFormat="application/json" count="500" xmlns:ns1="http://www.w3.org/2001/XMLSchema-instance" ns1:schemaLocation="http://www.opengis.net/wfs/2.0 http://schemas.opengis.net/wfs/2.0/wfs.xsd"><Query typeNames="core:buildings" xmlns:core="core"><Filter xmlns="http://www.opengis.net/fes/2.0"><Or><BBOX><ValueReference>geom</ValueReference><Envelope xmlns="http://www.opengis.net/gml/3.2" srsName="ESPG"><lowerCorner>-180 -90</lowerCorner><upperCorner>180 90</upperCorner></Envelope></BBOX><Intersects><ValueReference>geom</ValueReference><Polygon xmlns="http://www.opengis.net/gml/3.2"><exterior><LinearRing><posList srsDimension="2">6.609085800757157 20.548381396523084 15.240318467486333 5.11590215012076 29.99934901925451 15.087905911998007 24.121708960844103 21.80665402351343 6.609085800757157 20.548381396523084</posList></LinearRing></exterior></Polygon></Intersects></Or></Filter></Query></GetFeature>`
+
+  const getFeatureRequest = wfsClient200.GetFeatureRequest({
+    featureNS: 'core',
+    featurePrefix: 'core',
+    featureTypes: ['core:buildings'],
     outputFormat: 'application/json',
-    filter: Filter.bbox('geometryName', ext, 'uihi')
+    filter: Filter.or(
+      Filter.bbox('geom', extent, 'ESPG'),
+      Filter.intersects('geom', geometry)
+    )
   });
 
-  console.log('getCapabilitiesRequest: ', getCapabilitiesRequest)
-  describe('Request generation', () => {
-  });
   it('should return a defined request object', () => {
+    expect(getFeatureRequest).toBeDefined();
   });
-  const geom = new Geometry();
-  const dwithin = Filter.dwithin('', geom, 14, '');
-  const getFeatureReq = wfsClient200.GetFeatureRequest({
-    srsName: 'EPSG:2000',
-    featureNS: '',
-    featurePrefix: "",
-    featureTypes: [],
-    filter: Filter.bbox('geometryName', ext, 'uihi')
+
+  it('should contain expected body', () => {
+    expect(getFeatureRequest.body).toBe(getFeatureReq);
+  });
+
+  it('should contain expected parameters', () => {
+    expect(getFeatureRequest.baseUrl).toBe(BASE_URL);
+    expect(getFeatureRequest.method).toBe('POST');
+    expect(getFeatureRequest.params?.exceptions).toEqual('application/json');
   });
 })
