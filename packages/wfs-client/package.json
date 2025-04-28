@@ -16,11 +16,10 @@
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "prebuild": "npm run clean",
-    "build_old": "tsc --project tsconfig.build.json",
     "build": "rollup -c",
     "clean": "rimraf dist",
-    "prepack": "npm run build",
-    "prepare": "husky",
+    "preinstall": "npm run build && npm run copy:patches",
+    "copy:patches": "copyfiles ./patches/* ./dist",
     "postinstall": "patch-package"
   },
   "repository": {

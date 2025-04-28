@@ -14,7 +14,8 @@
     "prepare": "husky install",
     "prettier:check": "prettier --check packages/**/*.{js,jsx,ts,tsx}",
     "prettier:fix": "prettier --write packages/**/*.{js,jsx,ts,tsx}",
-    "postinstall": "patch-package"
+    "postinstall": "npm run patch:deps",
+    "patch:deps": "copyfiles -u 4 ./node_modules/@map-colonies/wfs-client/dist/patches/* . && patch-package"
   },
   "devDependencies": {
     "lerna": "^8.2.1"

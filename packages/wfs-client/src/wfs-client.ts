@@ -1,8 +1,8 @@
-import { unset, isArray, isObject } from 'lodash-es';
 import WFS from 'ol/format/WFS';
 import { getXMLSerializer } from 'ol/xml.js';
 import { DescribeFeatureTypeRequest, GetCapabilitiesRequest, GetFeatureRequest, Version, WFSPayload } from './interfaces';
-import { getJsonixContext } from './constants';
+import { getJsonixContext } from './jsonix-context';
+import { removeFieldRecursively, insertAtIndex } from './utils';
 
 export const DEFAULT_COUNT = 500;
 export const DEFAULT_VERSION = '2.0.0';
@@ -56,7 +56,7 @@ export class WfsClient {
     return payload;
   }
 
-  public GetFeatureRequest({ outputFormat = 'application/json', exceptions = 'application/json', ...rest }: GetFeatureRequest): WFSPayload {
+  public GetFeatureRequest({ sortBy, outputFormat = 'application/json', exceptions = 'application/json', ...rest }: GetFeatureRequest): WFSPayload {
     const countOrMaxFeature = {
       [this.version === '2.0.0' ? 'count' : 'maxFeatures']: rest.count ?? rest.maxFeatures ?? DEFAULT_COUNT
     } as { count: number } | { maxFeatures: number };
@@ -69,15 +69,38 @@ export class WfsClient {
 
     const body = getXMLSerializer().serializeToString(featureRequest);
 
+    let sortXML = '';
+    let modifiedBody = '';
+
+    sortBy?.map(sort => {
+      sortXML += `<SortProperty><ValueReference>${sort[0]}</ValueReference><SortOrder>${sort[1]}</SortOrder></SortProperty>`
+    });
+
+    if (sortBy && sortXML.length) {
+      const regex = /<Query[^>]*(\/>)/;
+
+      if (body.match(regex)) {
+        const start = body.indexOf('<Query');
+        const indexToReplace = body.indexOf('/>', start);
+        modifiedBody = insertAtIndex(body, indexToReplace, `><SortBy>${sortXML}</SortBy></Query>`)
+      } else {
+        modifiedBody = body.replace(
+          '</Query>',
+          `<SortBy>${sortXML}</SortBy></Query>`
+        );
+      }
+    }
+
     const host = this.baseUrl.split('/')[2];
 
     const payload = {
       baseUrl: this.baseUrl,
       method: 'POST',
-      body,
+      body: sortBy !== undefined ? modifiedBody : body,
       headers: {
         "Host": host,
-        "Content-Length": body.length.toString(),
+        "Content-Length": sortBy !== undefined ? modifiedBody.length.toString() : body.length.toString(),
+        "Content-Type": 'text/xml'
       },
       params: {
         exceptions
@@ -96,8 +119,8 @@ export class WfsClient {
 
       // eslint-disable-next-line
       const json = jsonixUnmarshaller.unmarshalString(xml) as Record<string, unknown>;
-      const res = this.removeFieldRecursively(json.value, 'TYPE_NAME');
-      formatFeatures ?? this.formattedFeaturesByVersion(res);
+      const res = removeFieldRecursively(json.value, 'TYPE_NAME');
+      formatFeatures && this.formattedFeaturesByVersion(res);
 
       return res;
     } catch (err) {
@@ -110,27 +133,13 @@ export class WfsClient {
     if (this.version === '2.0.0') {
       const featureArr = obj.featureTypeList.featureType.map((feature: any) => ({
         name: `${feature.name.namespaceURI}:${feature.name.localPart}`,
-        title: feature.title[0].value,
-        abstract: feature._abstract[0].value,
-        keywords: ((feature.keywords[0].keyword.map((kw: any) => kw.value)) as string[]),
+        title: feature.title?.[0].value,
+        abstract: feature._abstract?.[0].value,
+        keywords: ((feature.keywords[0]?.keyword.map((kw: any) => kw.value)) as string[]),
         defaultCRS: feature.defaultCRS,
         wgs84BoundingBox: feature.wgs84BoundingBox[0]
       }))
       obj.featureTypeList = featureArr;
     }
-  }
-
-  private removeFieldRecursively(obj: any, fieldToRemove: string) {
-    if (isArray(obj)) {
-      obj.forEach(item => this.removeFieldRecursively(item, fieldToRemove));
-    } else if (isObject(obj)) {
-      unset(obj, fieldToRemove);
-      for (const property in obj) {
-        if (isObject(obj[property])) {
-          this.removeFieldRecursively(obj[property], fieldToRemove);
-        }
-      }
-    }
-    return obj;
   }
 }

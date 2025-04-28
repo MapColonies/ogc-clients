@@ -10,10 +10,13 @@ export type DescribeFeatureTypeRequest = {
   exceptions?: OutputFormat
 }
 
+export type SortBy = [string, 'asc' | 'desc'];
+
 export type GetFeatureRequest = Omit<GetFeatureOptions, 'outputFormat' | 'srsName'> & {
   srsName?: `EPSG:${EpsgCode}`,
   outputFormat?: OutputFormat,
-  exceptions?: OutputFormat
+  exceptions?: OutputFormat,
+  sortBy?: SortBy[]
 }
 
 export type OutputFormat =
