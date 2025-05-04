@@ -57,6 +57,7 @@ describe('GetCapabilities', function () {
                   <ows:LowerCorner>-180.0 -90.0</ows:LowerCorner>
                   <ows:UpperCorner>180.0 90.0</ows:UpperCorner>
               </ows:WGS84BoundingBox>
+              <MetadataURL xlink:href="mockurl.com"/>
           </FeatureType>
       </FeatureTypeList>
     </wfs:WFS_Capabilities>`;
@@ -72,7 +73,8 @@ describe('GetCapabilities', function () {
       {
         lowerCorner: [-180.0, -90.0],
         upperCorner: [180.0, 90.0]
-      }
+      },
+      metadataUrl: "mockurl.com",
     }
   ];
 
@@ -113,6 +115,11 @@ describe('GetCapabilities', function () {
           "lowerCorner": [-180, -90],
           "upperCorner": [180, 90]
         }
+      ],
+      metadataURL: [
+        {
+          "href": "mockurl.com"
+        }
       ]
     }]
   };
@@ -145,7 +152,7 @@ describe('GetCapabilities', function () {
       expect(json).toBeDefined();
       expect(json.featureTypeList).toEqual(formattedFeatureTypesJson);
     });
-
+    
     it('should correctly parse XML to JSON using xmlToJson, without formmated featureTypeList', () => {
       const json = wfsClient200.xmlToJson(getCapabilitiesResponseXml200, false);
       expect(json).toBeDefined();
@@ -155,7 +162,7 @@ describe('GetCapabilities', function () {
 });
 
 describe('GetFeature', () => {
-  const getFeatureReq = `<GetFeature xmlns=\"http://www.opengis.net/wfs/2.0\" service=\"WFS\" version=\"2.0.0\" outputFormat=\"application/json\" startIndex=\"300\" count=\"500\" xmlns:ns1=\"http://www.w3.org/2001/XMLSchema-instance\" ns1:schemaLocation=\"http://www.opengis.net/wfs/2.0 http://schemas.opengis.net/wfs/2.0/wfs.xsd\"><Query typeNames=\"core:buildings\" xmlns:core=\"core\"><Filter xmlns=\"http://www.opengis.net/fes/2.0\"><And><BBOX><ValueReference>geom</ValueReference><Envelope xmlns=\"http://www.opengis.net/gml/3.2\" srsName=\"ESPG\"><lowerCorner>-180 -90</lowerCorner><upperCorner>180 90</upperCorner></Envelope></BBOX><Intersects><ValueReference>geom</ValueReference><Polygon xmlns=\"http://www.opengis.net/gml/3.2\" srsName=\"EPSG:4326\"><exterior><LinearRing srsName=\"EPSG:4326\"><posList srsDimension=\"2\">35.28685467327085 32.613825853105666 35.28685467327085 32.608815506513025 35.29491077260772 32.608815506513025 35.29491077260772 32.613825853105666 35.28685467327085 32.613825853105666</posList></LinearRing></exterior></Polygon></Intersects></And></Filter><SortBy><SortProperty><ValueReference>id</ValueReference><SortOrder>asc</SortOrder></SortProperty><SortProperty><ValueReference>is_sensitive</ValueReference><SortOrder>desc</SortOrder></SortProperty></SortBy></Query></GetFeature>`
+  const getFeatureReq = `<GetFeature xmlns=\"http://www.opengis.net/wfs/2.0\" service=\"WFS\" version=\"2.0.0\" outputFormat=\"application/json\" startIndex=\"300\" count=\"500\" xmlns:ns1=\"http://www.w3.org/2001/XMLSchema-instance\" ns1:schemaLocation=\"http://www.opengis.net/wfs/2.0 http://schemas.opengis.net/wfs/2.0/wfs.xsd\"><Query typeNames=\"core:buildings\" xmlns:core=\"core\"><Filter xmlns=\"http://www.opengis.net/fes/2.0\"><And><BBOX><ValueReference>geom</ValueReference><Envelope xmlns=\"http://www.opengis.net/gml/3.2\" srsName=\"EPSG\"><lowerCorner>-180 -90</lowerCorner><upperCorner>180 90</upperCorner></Envelope></BBOX><Intersects><ValueReference>geom</ValueReference><Polygon xmlns=\"http://www.opengis.net/gml/3.2\" srsName=\"EPSG:4326\"><exterior><LinearRing srsName=\"EPSG:4326\"><posList srsDimension=\"2\">35.28685467327085 32.613825853105666 35.28685467327085 32.608815506513025 35.29491077260772 32.608815506513025 35.29491077260772 32.613825853105666 35.28685467327085 32.613825853105666</posList></LinearRing></exterior></Polygon></Intersects></And></Filter><SortBy><SortProperty><ValueReference>id</ValueReference><SortOrder>asc</SortOrder></SortProperty><SortProperty><ValueReference>nillable</ValueReference><SortOrder>desc</SortOrder></SortProperty></SortBy></Query></GetFeature>`
   const extent: Extent = [-180, -90, 180, 90];
   const geometry = new Geom.Polygon([
     [
@@ -188,9 +195,9 @@ describe('GetFeature', () => {
     featureTypes: ['core:buildings'],
     startIndex: 300,
     outputFormat: 'application/json',
-    sortBy: [['id', 'asc'], ['is_sensitive', 'desc']],
+    sortBy: [['id', 'asc'], ['nillable', 'desc']],
     filter: Filter.and(
-      Filter.bbox('geom', extent, 'ESPG'),
+      Filter.bbox('geom', extent, 'EPSG'),
       Filter.intersects('geom', geometry, 'EPSG:4326')
     )
   });
@@ -208,4 +215,19 @@ describe('GetFeature', () => {
     expect(getFeatureRequest.method).toBe('POST');
     expect(getFeatureRequest.params?.exceptions).toEqual('application/json');
   });
-})
+});
+
+describe('DescribeFeatureType', () => {
+  const describeFeatureTypeRequest = wfsClient200.DescribeFeatureTypeRequest(['buildings', 'roads']);
+
+  it('should return a defined request object', () => {
+    expect(describeFeatureTypeRequest).toBeDefined();
+  });
+
+  it('should contain expected parameters', () => {
+    const typeNames = 'buildings,roads';
+
+    expect(describeFeatureTypeRequest.params?.typeNames).toBe(typeNames);
+    expect(describeFeatureTypeRequest).toBeDefined();
+  });
+});

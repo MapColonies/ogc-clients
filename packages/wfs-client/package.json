@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "This is template for map colonies typescript packages",
   "main": "./dist/index.cjs.js",
+  "types": "./dist/index.d.ts",
   "module": "dist/index.esm.js",
   "browser": "dist/index.umd.js",
   "scripts": {
@@ -17,24 +18,23 @@
     "lint:fix": "eslint --fix .",
     "prebuild": "npm run clean",
     "build": "rollup -c",
+    "prepare": "npm run build && npm run copy:patches",
     "clean": "rimraf dist",
-    "preinstall": "npm run build && npm run copy:patches",
-    "copy:patches": "copyfiles ./patches/* ./dist",
-    "postinstall": "patch-package"
+    "copy:patches": "copyfiles ./patches/* ./dist"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MapColonies/ts-npm-package-boilerplate.git"
+    "url": "git+https://github.com/MapColonies/ogc-clients.git"
   },
   "author": "MapColonies",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/MapColonies/ts-npm-package-boilerplate/issues"
+    "url": "https://github.com/MapColonies/ogc-clients/issues"
   },
   "files": [
     "dist/**/*"
   ],
-  "homepage": "https://github.com/MapColonies/ts-npm-package-boilerplate#readme",
+  "homepage": "https://github.com/MapColonies/ogc-clients#readme",
   "publishConfig": {
     "access": "public"
   },

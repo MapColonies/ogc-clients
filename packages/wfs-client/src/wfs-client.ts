@@ -35,7 +35,7 @@ export class WfsClient {
     return payload;
   }
 
-  public DescribeFeatureType(typeNames: Array<string>, { outputFormat = 'application/json', exceptions = 'application/json' }: DescribeFeatureTypeRequest = {}): WFSPayload {
+  public DescribeFeatureTypeRequest(typeNames: Array<string>, { outputFormat = 'application/json', exceptions = 'application/json' }: DescribeFeatureTypeRequest = {}): WFSPayload {
     const host = this.baseUrl.split('/')[2];
 
     const payload = {
@@ -124,22 +124,22 @@ export class WfsClient {
 
       return res;
     } catch (err) {
-      console.log('error her on json: ', err)
       throw new Error(`Could not parse the XML for this request. ${(err as Error).message}`);
     }
   }
 
-  private formattedFeaturesByVersion(obj: any) {
+  private formattedFeaturesByVersion(features: any) {
     if (this.version === '2.0.0') {
-      const featureArr = obj.featureTypeList.featureType.map((feature: any) => ({
+      const featureArr = features.featureTypeList?.featureType?.map((feature: any) => ({
         name: `${feature.name.namespaceURI}:${feature.name.localPart}`,
         title: feature.title?.[0].value,
         abstract: feature._abstract?.[0].value,
-        keywords: ((feature.keywords[0]?.keyword.map((kw: any) => kw.value)) as string[]),
+        keywords: ((feature.keywords[0]?.keyword?.map((kw: any) => kw.value)) as string[]),
         defaultCRS: feature.defaultCRS,
-        wgs84BoundingBox: feature.wgs84BoundingBox[0]
-      }))
-      obj.featureTypeList = featureArr;
+        wgs84BoundingBox: feature.wgs84BoundingBox?.[0],
+        metadataUrl: feature.metadataURL?.[0]?.href
+      }));
+      features.featureTypeList = featureArr;
     }
   }
 }
