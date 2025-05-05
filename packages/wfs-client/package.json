@@ -1,6 +1,6 @@
 {
   "name": "@map-colonies/wfs-client",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "This is template for map colonies typescript packages",
   "main": "./dist/index.cjs.js",
   "types": "./dist/index.d.ts",
