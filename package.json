@@ -16,6 +16,7 @@
     "prettier:fix": "prettier --write packages/**/*.{js,jsx,ts,tsx}"
   },
   "devDependencies": {
+    "@map-colonies/commitlint-config": "^1.1.1",
     "cross-env": "^7.0.3",
     "husky": "^9.1.7",
     "lerna": "^8.2.1"
