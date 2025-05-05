@@ -5,19 +5,18 @@
     "packages/*"
   ],
   "scripts": {
-    "build:wfs-client": "lerna run --scope @map-colonies/wfs-client build --stream",
-    "test:wfs-client": "lerna run --scope @map-colonies/wfs-client test --stream",
-    "build": "lerna run build --stream",
+    "build:wfs-client": "npx lerna run --scope @map-colonies/wfs-client build --stream",
+    "test:wfs-client": "npx lerna run --scope @map-colonies/wfs-client test --stream",
+    "build": "npx lerna run build --stream",
     "release": "cross-env HUSKY=0 lerna publish",
-    "test": "NODE_ENV=test jest --coverage",
+    "test": "cross-env NODE_ENV=test jest --coverage",
     "lint": "eslint . --ext .ts,.tsx",
     "prepare": "husky install",
     "prettier:check": "prettier --check packages/**/*.{js,jsx,ts,tsx}",
-    "prettier:fix": "prettier --write packages/**/*.{js,jsx,ts,tsx}",
-    "postinstall": "npm run patch:deps",
-    "patch:deps": "copyfiles -u 4 ./node_modules/@map-colonies/wfs-client/dist/patches/* . && patch-package"
+    "prettier:fix": "prettier --write packages/**/*.{js,jsx,ts,tsx}"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "lerna": "^8.2.1"
   }
 }

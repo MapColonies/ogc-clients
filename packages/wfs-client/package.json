@@ -9,7 +9,7 @@
   "scripts": {
     "test:unit": "jest --config=./tests/configurations/unit/jest.config.js",
     "test:unit:debug": "jest --config=./tests/configurations/unit/jest.config.js --debug",
-    "test": "tsc --noEmit -p tsconfig.json && jest --config=./tests/configurations/jest.config.js",
+    "test": "npm run test:unit",
     "format": "prettier --check .",
     "format:fix": "prettier --write .",
     "prelint:fix": "npm run format:fix",
