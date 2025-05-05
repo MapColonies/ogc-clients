@@ -19,6 +19,7 @@
     "@map-colonies/commitlint-config": "^1.1.1",
     "cross-env": "^7.0.3",
     "husky": "^9.1.7",
-    "lerna": "^8.2.1"
+    "lerna": "^8.2.1",
+    "rimraf": "^6.0.1"
   }
 }
