@@ -46,12 +46,12 @@ Accepts only an optional exceptions parameter and returns a ready-to-use GetCapa
 ### 🌐 DescribeFeatureType (WFS Operation)
 Accepts type names as an array of strings, an optional exceptions parameter, and an optional outputFormat (defaulting to 'application/json'), and returns a ready-to-use DescribeFeatureType request.
 
-The default format for GetFeature is application/json.
+The default format for DescribeFeatureType is 'application/json'.
 
 ### 🌐 GetFeature (WFS Operation)
 Accepting GetFeatureRequest for building GetFeature request.
 If not specified, the default count/maxFeatures value will be 500.
-The default format for GetFeature response is application/json.
+The default format for GetFeature response is 'application/json'.
 
 🔔 **Note:** Each of the **WFS Operations** API's accepts an optional ```exceptions``` parameter to specify the format of exceptions. If not provided, the default format is ```'application/json'```.
 
