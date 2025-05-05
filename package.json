@@ -1,13 +1,11 @@
 {
   "name": "root",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": ["packages/*"],
   "scripts": {
-    "build:wfs-client": "npx lerna run --scope @map-colonies/wfs-client build --stream",
-    "test:wfs-client": "npx lerna run --scope @map-colonies/wfs-client test --stream",
-    "build": "npx lerna run build --stream",
+    "build:wfs-client": "lerna run --scope @map-colonies/wfs-client build --stream",
+    "test:wfs-client": "lerna run --scope @map-colonies/wfs-client test --stream",
+    "build": "lerna run build --stream",
     "release": "cross-env HUSKY=0 lerna publish",
     "test": "cross-env NODE_ENV=test jest --coverage",
     "lint": "eslint . --ext .ts,.tsx",
@@ -19,7 +17,7 @@
     "@map-colonies/commitlint-config": "^1.1.1",
     "cross-env": "^7.0.3",
     "husky": "^9.1.7",
-    "lerna": "^8.2.1",
+    "lerna": "^7.0.2",
     "rimraf": "^6.0.1"
   }
 }

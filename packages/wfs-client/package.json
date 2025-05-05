@@ -27,7 +27,7 @@
     "url": "git+https://github.com/MapColonies/ogc-clients.git"
   },
   "author": "MapColonies",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/MapColonies/ogc-clients/issues"
   },
